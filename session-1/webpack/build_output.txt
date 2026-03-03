@@ -1,0 +1,20 @@
+﻿
+> webpack@1.0.0 build
+> webpack
+
+asset [1m[32mbundle.js[39m[22m 1.14 MiB [1m[32m[emitted][39m[22m (name: main)
+runtime modules 1.04 KiB 5 modules
+modules by path [1m./node_modules/[39m[22m 1.09 MiB
+  modules by path [1m./node_modules/react-dom/[39m[22m 1.04 MiB
+    modules by path [1m./node_modules/react-dom/*.js[39m[22m 2.67 KiB 2 modules
+    modules by path [1m./node_modules/react-dom/cjs/*.js[39m[22m 1.03 MiB 2 modules
+  modules by path [1m./node_modules/react/[39m[22m 46.3 KiB
+    [1m./node_modules/react/index.js[39m[22m 186 bytes [1m[33m[built][39m[22m [1m[33m[code generated][39m[22m
+    [1m./node_modules/react/cjs/react.development.js[39m[22m 46.1 KiB [1m[33m[built][39m[22m [1m[33m[code generated][39m[22m
+  modules by path [1m./node_modules/scheduler/[39m[22m 12 KiB
+    [1m./node_modules/scheduler/index.js[39m[22m 194 bytes [1m[33m[built][39m[22m [1m[33m[code generated][39m[22m
+    [1m./node_modules/scheduler/cjs/scheduler.development.js[39m[22m 11.9 KiB [1m[33m[built][39m[22m [1m[33m[code generated][39m[22m
+modules by path [1m./src/*.js[39m[22m 378 bytes
+  [1m./src/index.js[39m[22m 215 bytes [1m[33m[built][39m[22m [1m[33m[code generated][39m[22m
+  [1m./src/App.js[39m[22m 163 bytes [1m[33m[built][39m[22m [1m[33m[code generated][39m[22m
+webpack 5.105.3 compiled [1m[32msuccessfully[39m[22m in 4875 ms
