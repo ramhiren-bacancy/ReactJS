@@ -3,7 +3,11 @@ import Que_1 from './components/Que_1'
 import Que_2 from './components/Que_2'
 import Body from './components/que_3/Body'
 import { CounterProvider } from './components/que_3/CountContext'
+import Que_6 from './components/Que_6'
+import Que_7 from './components/useContext/Que_7'
 import Que_4 from './components/usememo/Que_4'
+import Que_4_1 from './components/usememo/Que_4_1'
+import Que_5 from './components/useRef/Que_5'
 
 function App() {
 
@@ -14,7 +18,11 @@ function App() {
     {/* <CounterProvider>
       <Body/>
     </CounterProvider> */}
-    <Que_4/> 
+    {/* <Que_4/>  */}
+    {/* <Que_4_1/> */}
+    {/* <Que_5/> */}
+    {/* <Que_6/> */}
+      <Que_7/>
     </>
   )
 }
