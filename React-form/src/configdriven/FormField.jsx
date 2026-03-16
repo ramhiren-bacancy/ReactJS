@@ -1,4 +1,7 @@
+import Tags from "./Tags";
+
 function FormField({ field, value, error, onChange, onBlur, data }) {
+  
 
   if (field.type === "select") {
     const options = field.optionsByGender
@@ -84,6 +87,29 @@ function FormField({ field, value, error, onChange, onBlur, data }) {
       </>
     );
   }
+
+  //tags
+   if (field.type === "tags") {
+    return (
+      <div className="mb-4">
+        <label className="block  font-medium text-black">
+          {field.label}
+        </label>
+        <Tags
+          name={field.name}
+          value={value}
+          placeholder= "Add a skill and press enter"
+          onChange={(updatedTags) =>
+            onChange({ target: { name: field.name, value: updatedTags, type: "tags" } })
+          }
+        />
+      
+        {error && <p className="text-red-500 text-xs">{error}</p>}
+      </div>
+    );
+  }
+ 
+
 
   // text, email, password, confirmPassword
   return (

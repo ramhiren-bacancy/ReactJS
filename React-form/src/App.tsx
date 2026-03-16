@@ -1,5 +1,5 @@
 import './App.css'
-import Form from './configdrivenJS/Form'
+import Form from './configdriven/Form'
 
 
 function App() {

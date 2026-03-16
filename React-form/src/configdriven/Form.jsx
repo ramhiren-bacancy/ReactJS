@@ -6,7 +6,7 @@ import FormField from "./FormField.jsx";
 function init() {
   const data = {};
   formConfig.forEach((field) => {
-    data[field.name] = field.type === "checkbox" ? [] : "";
+    data[field.name] = field.type === "checkbox" || field.type === "tags" ? [] : "";
   });
   return data;
 }
@@ -30,6 +30,13 @@ export default function Form() {
     if (field.type === "checkbox") {
       if (rules.required && value.length === 0) {
         return `Please select at least one ${field.label}`;
+      }
+      return "";
+    }
+    
+    if (field.type === "tags") {
+      if (rules.required && value.length === 0) {
+        return `Please add at least one ${field.label}`;
       }
       return "";
     }
@@ -73,6 +80,13 @@ export default function Form() {
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
+
+    //if tags is come
+    if (type === "tags") {
+      setData((prev) => ({ ...prev, [name]: value }));
+      if (validationMode === "onChange") runValidation(name, value);
+      return;
+    }
 
     //when checkbox come
     if (type === "checkbox") {
@@ -165,7 +179,7 @@ export default function Form() {
 
   return (
     <>
-      <div className="bg-gray-400 text-black p-4 rounded mt-4 flex flex-col">
+      <div className="bg-gray-400 text-black p-16 rounded mt-4 flex flex-col">
       <h2>Practice Form</h2>
 
       <div className="mb-4">

@@ -36,6 +36,11 @@ export const formConfig = [
     },
   },
   {
+    name: "country",
+    label: "Country",
+    type: "text",
+  },
+  {
     name: "gender",
     label: "Gender",
     type: "radio",
@@ -61,9 +66,9 @@ export const formConfig = [
     optionsByGender: {
       male: [
         { label: "Select Outlook", value: "" },
-        { label: "Beard", value: "beard" },
-        { label: "Mustache", value: "mustache" },
-        { label: "Clean Shaven", value: "clean-shaven" },
+        { label: "wolf Cut", value: "wolf-cut" },
+        { label: "mullet Cut", value: "mullet-cut" },
+        { label: "mid Fade", value: "mid-fade" },
       ],
       female: [
         { label: "Select Outlook", value: "" },
@@ -116,6 +121,25 @@ export const formConfig = [
     validation: {
       required: true,
       matchField: "password",
+    },
+  },
+  {
+    name: "terms",
+    type: "checkbox",
+    options: [
+      { label: "I accept terms all terms and conditions", value: "accepted" },
+    ],
+    validation: {
+      required: true,
+    },
+  },
+  {
+  name: "skills",
+  label: "Skills",
+  type: "tags",           
+  validation: {
+      required: true,
+      minTags: 1,  
     },
   },
 ];
