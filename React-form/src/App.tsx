@@ -1,5 +1,8 @@
 import './App.css'
 import Form from './configdriven/Form'
+import ClassComponent  from './classbase/ClassComponent'
+import {jobApplicationConfig}  from './configdriven/jobApplicationConfig.js'
+import { formConfig} from './configdriven/FormConfig.js'
 
 
 function App() {
@@ -9,7 +12,8 @@ function App() {
     <h1 className='underline'> React JS Form</h1>
     {/* <Form/> */}
      {/* <Practices/> */}
-     <Form/>
+     <Form config={formConfig} />
+     {/* <ClassComponent/> */}
     </>
   )
 }

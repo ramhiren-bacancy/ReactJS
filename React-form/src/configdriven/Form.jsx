@@ -1,20 +1,22 @@
 import { useRef, useState } from "react";
-import { formConfig } from "./FormConfig.js";
 import FormField from "./FormField.jsx";
+import { runZodValidation } from "./Zodschema.js";
+import { validateField } from "./Validation.js";
 
-
-function init() {
+function init(config) {
   const data = {};
-  formConfig.forEach((field) => {
-    data[field.name] = field.type === "checkbox" || field.type === "tags" ? [] : "";
+  config.forEach((field) => {
+    data[field.name] =
+      field.type === "checkbox" || field.type === "tags" ? [] : "";
   });
   return data;
 }
 
-export default function Form() {
-  const [data, setData] = useState(init);
-  const [errors, setErrors] = useState(init);
+export default function Form({ config }) {
+  const [data, setData] = useState(() => init(config));
+  const [errors, setErrors] = useState(init(config));
   const [validationMode, setValidationMode] = useState("onChange");
+  const [validationEngine, setValidationEngine] = useState("manualValidation");
 
   const passwordRef = useRef("");
   const confirmPasswordRef = useRef("");
@@ -23,141 +25,95 @@ export default function Form() {
     setValidationMode(e.target.value);
   }
 
-  function validateField(field, value) {
-    const rules = field.validation ?? {};
-
-    // checkbox's value in array
-    if (field.type === "checkbox") {
-      if (rules.required && value.length === 0) {
-        return `Please select at least one ${field.label}`;
-      }
-      return "";
-    }
-    
-    if (field.type === "tags") {
-      if (rules.required && value.length === 0) {
-        return `Please add at least one ${field.label}`;
-      }
-      return "";
-    }
-
-    if (rules.required && !value) {
-      return `${field.label} is required`;
-    }
-    if (rules.numbersOnly && !/^\d+$/.test(value)) {
-      return `${field.label} must be a number`;
-    }
-    if (rules.maxValue && Number(value) > rules.maxValue) {
-      return `Enter a valid ${field.label}`;
-    }
-    if (rules.minLength && value.length < rules.minLength) {
-      return `${field.label} must be at least ${rules.minLength} characters`;
-    }
-    
-    if (rules.pattern && !rules.pattern.test(value)) {
-      return rules.patternMessage ?? `${field.label} is invalid`;
-    }
-    if (rules.strongPassword && !/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(value)) {
-      return "Enter strong password (8+ chars, 1 uppercase, 1 number)";
-    }
-    // cnf-password match with password
-    if (rules.matchField && value !== data[rules.matchField]) {
-      return "Passwords do not match";
-    }
-
-    if (rules.matchField && value !== passwordRef.current) {
-      return "Passwords do not match";
-    }
-
-    return "";
+  function handleEngineChange(e) {
+    setValidationEngine(e.target.value);
+    setErrors(init(config));
   }
 
-  function runValidation(name, value) {
-    const field = formConfig.find((f) => f.name === name);
-    const error = validateField(field, value);
-    setErrors((prev) => ({ ...prev, [name]: error }));
-  }
+  function runValidation(name, value, latestData) {
+    const currentData = latestData ?? { ...data, [name]: value };
 
-  function handleChange(e) {
-    const { name, value, type, checked } = e.target;
-
-    //if tags is come
-    if (type === "tags") {
-      setData((prev) => ({ ...prev, [name]: value }));
-      if (validationMode === "onChange") runValidation(name, value);
+    if (validationEngine === "zodValidation") {
+      const zodErrors = runZodValidation(currentData);
+      setErrors((prev) => ({ ...prev, [name]: zodErrors[name] ?? "" }));
       return;
+    } else {
+      const field = config.find((f) => f.name === name);
+      if (!field) return;
+
+      const error = validateField(field, value, currentData);
+      // cnf-password match with password
+      if (field.type == "password" && confirmPasswordRef.current) {
+     
+        if(confirmPasswordRef.current !== passwordRef.current){
+          setErrors((prev) => ({ ...prev, confirmPassword: "Passwords do not match From REF" }));
+        }else{
+          setErrors((prev) => ({ ...prev, confirmPassword: "" }));
+        }
+      }
+      setErrors((prev) => ({ ...prev, [name]: error }));
     }
+  }
 
-    //when checkbox come
-    if (type === "checkbox") {
-      const prev = data[name];
-      const updated = checked
-        ? [...prev, value]
-        : prev.filter((v) => v !== value);
-
-      setData((prev) => ({ ...prev, [name]: updated }));
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setData((prev) => {
+      let updatedValues = { ...prev, [name]: value };
 
       if (validationMode === "onChange") {
-        runValidation(name, updated);
+        runValidation(name, value, updatedValues);
       }
-      return;
-    }
-
+      return updatedValues;
+    });
     if (name === "password") {
       passwordRef.current = value;
- 
-    
-      // if cnf-password already have value,so reValidate that
-      if (confirmPasswordRef.current) {
-        runValidation("confirmPassword", confirmPasswordRef.current);
-      }
     }
- 
     if (name === "confirmPassword") {
       confirmPasswordRef.current = value;
-    }
-
-    setData((prev) => ({ ...prev, [name]: value }));
-
-    if (validationMode === "onChange") {
-      runValidation(name, value);
-    }
-  }
-
+    }  
+  };
+  
   function handleBlur(e) {
     const { name, value } = e.target;
 
     if (validationMode === "onBlur") {
-      runValidation(name, value);
+      const field = config.find((f) => f.name === name);
+    
+    // For array-based fields, use value from state not e.target.value
+    const resolvedValue = (field?.type === "checkbox" || field?.type === "tags")
+      ? data[name]
+      : value;
 
-      // in blur mode password field blur and cnf-password already have value,so reValidate that
-      if (name === "password" && confirmPasswordRef.current) {
-        runValidation("confirmPassword", confirmPasswordRef.current);
-      }
+    const updatedValues = { ...data, [name]: resolvedValue };
+    runValidation(name, resolvedValue, updatedValues);
     }
   }
-
-  
 
   function handleSubmit(e) {
     e.preventDefault();
 
-    let hasError = false;
+    if (validationEngine === "zodValidation") {
+       const zodErrors = runZodValidation(data);
+      const hasError = Object.keys(zodErrors).length > 0;
+      setErrors((prev) => ({ ...prev, ...zodErrors }));
+      if (hasError) return;
+    } else {
+      let hasError = false;
 
-    formConfig.forEach((field) => {
+      config.forEach((field) => {
+        const error = validateField(field, data[field.name], data);
+        setErrors((prev) => ({ ...prev, [field.name]: error }));
+        if (error) hasError = true;
+      });
 
-      const error = validateField(field, data[field.name]);
-      setErrors((prev) => ({ ...prev, [field.name]: error }));
-      if (error) hasError = true;
-    });
-
-    if (hasError) return;
+      if (hasError) return;
+    }
 
     console.log("Submitted:", data);
     alert("Success! Check console.");
-   
-    setData(init());
-    setErrors(init());
+
+    setData(init(config));
+    setErrors(init(config));
     passwordRef.current = "";
     confirmPasswordRef.current = "";
   }
@@ -168,11 +124,9 @@ export default function Form() {
     return field.conditional.showWhen.includes(watchValue);
   }
 
-   function handleReset() {
-
-    
-    setData(init());
-    setErrors(init());
+  function handleReset() {
+    setData(init(config));
+    setErrors(init(config));
     passwordRef.current = "";
     confirmPasswordRef.current = "";
   }
@@ -180,39 +134,63 @@ export default function Form() {
   return (
     <>
       <div className="bg-gray-400 text-black p-16 rounded mt-4 flex flex-col">
-      <h2>Practice Form</h2>
+        <h2>Practice Form</h2>
 
-      <div className="mb-4">
-        <label htmlFor="validationMode" className=" font-medium text-black">Validation Mode: </label>
-        <select
-          id="validationMode"
-          value={validationMode}
-          onChange={handleModeChange}
-          className="bg-gray-600 border rounded"
-        >
-          <option value="onBlur">onBlur</option>
-          <option value="onChange">onChange</option>
-          <option value="onSubmit">onSubmit</option>+
-        </select>
-      </div>
+        <div className="mb-4">
+          <label htmlFor="validationMode" className=" font-medium text-black">
+            Validation Mode:
+          </label>
+          <select
+            id="validationMode"
+            value={validationMode}
+            onChange={handleModeChange}
+            className="bg-gray-600 border rounded"
+          >
+            <option value="onBlur">onBlur</option>
+            <option value="onChange">onChange</option>
+            <option value="onSubmit">onSubmit</option>+
+          </select>
+        </div>
 
-      <form onSubmit={handleSubmit}>
-        {formConfig.filter(isVisible).map((field) => (
-          <FormField
-            key={field.name}
-            field={field}
-            value={data[field.name]}
-            error={errors[field.name]}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            data={data}  
-    
-          />
-        ))}
-        <button type="submit" className="text-white ">Submit</button>
+        <div>
+          <label htmlFor="validationEngine" className="font-medium text-black">
+            Validation Engine:
+          </label>
+          <select
+            id="validationEngine"
+            value={validationEngine}
+            onChange={handleEngineChange}
+            className="bg-gray-600 border rounded"
+          >
+            <option value="manualValidation">Manual Validation</option>
+            <option value="zodValidation">Zod Validation</option>
+          </select>
+        </div>
 
-          <button type="button" onClick={handleReset} className="text-white ml-4">Reset</button>
-      </form>
+        <form onSubmit={handleSubmit}>
+          {config.filter(isVisible).map((field) => (
+            <FormField
+              key={field.name}
+              field={field}
+              value={data[field.name]}
+              error={errors[field.name]}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              data={data}
+            />
+          ))}
+          <button type="submit" className="text-white ">
+            Submit
+          </button>
+
+          <button
+            type="button"
+            onClick={handleReset}
+            className="text-white ml-4"
+          >
+            Reset
+          </button>
+        </form>
       </div>
     </>
   );

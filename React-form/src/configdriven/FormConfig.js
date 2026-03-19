@@ -6,6 +6,8 @@ export const formConfig = [
     validation: {
       required: true,
       minLength: 2,
+      noSpaces: true,
+      noNumbers: true,
     },
   },
   {
@@ -17,7 +19,6 @@ export const formConfig = [
       required: true,
       numbersOnly: true,
       maxValue: 150,
-      maxLength : 3,
     },
   },
   {
@@ -126,6 +127,7 @@ export const formConfig = [
   {
     name: "terms",
     type: "checkbox",
+    label: "Terms and Conditions",
     options: [
       { label: "I accept terms all terms and conditions", value: "accepted" },
     ],
