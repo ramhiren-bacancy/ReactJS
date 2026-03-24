@@ -5,6 +5,6 @@ import App from './App.tsx'
 import Scroll from './Scroll.tsx'
 
 createRoot(document.getElementById('root')!).render(
-    // <App />
-    <Scroll/>
+    <App />
+    // <Scroll/>
 )

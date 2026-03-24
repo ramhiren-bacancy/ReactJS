@@ -5,7 +5,7 @@ function useDebounce(query:string){
 
     useEffect(()=>{
         const time_id=setTimeout(() => {
-            if(query.trim()=="" || query.trim() == value) return
+            if(query.trim() == value) return
             setValue(query)
         }, 500);
 

@@ -33,6 +33,7 @@ function App() {
   const [order,setOrder] = useState("asc")
   const limit = 10;
 
+  console.log(debounceQuery)
 
   function handlePrevious() {
     if (page == 0) return;
@@ -42,7 +43,7 @@ function App() {
   async function fetchData() {
     let url = baseURL;
     if (debounceQuery) {
-      url = baseURL + `/search?q=${debounceQuery}`;
+      url = baseURL + `/search?q=${debounceQuery}&limit=${limit}&skip=${limit * page}`;
     }
     else {
       url = baseURL + `?limit=${limit}&skip=${limit * page}`;
