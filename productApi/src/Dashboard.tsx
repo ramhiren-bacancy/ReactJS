@@ -1,22 +1,13 @@
 import { useEffect, useState } from "react";
+import Card from "./components/Card";
+import useDebounce from "./hook/useDebounce";
+import type { Product,ProductResponse } from "./types/product";
+import { useCart } from "./context/CartContext";
+import ProductPage from "./components/ProductPage";
+import Navbar from "./components/Navbar";
 
 const BASE_URL = "https://dummyjson.com/products";
 
-type Product = {
-  id: number;
-  title: string;
-  category: string;
-  price: number;
-  rating: number;
-  thumbnail: string;
-};
-
-type ProductResponse = {
-  products: Product[];
-  total: number;
-  skip: number;
-  limit: number;
-};
 
 function Dashboard() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -29,26 +20,13 @@ function Dashboard() {
 
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  // const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [debouncedSearch,setDebouncedSearch] = useDebounce(search)
   const [loading, setLoading] = useState(false);
 
   const limit = 10;
 
-  function handlePrevious() {
-    if (page == 0) {
-      return;
-    }
-    setPage(page - 1);
-  }
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(search);
-      setPage(0);
-    }, 500); 
-
-    return () => clearTimeout(timer); 
-  }, [search]);
 
   useEffect(() => {
     fetch(`${BASE_URL}/category-list`)
@@ -66,7 +44,7 @@ function Dashboard() {
     }
     // Search
     else if (debouncedSearch) {
-      url = `${BASE_URL}/search?q=${search}&limit=${limit}&skip=${page * limit}`;
+      url = `${BASE_URL}/search?q=${debouncedSearch}&limit=${limit}&skip=${page * limit}`;
     }
     // Default
     else {
@@ -94,8 +72,8 @@ function Dashboard() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="mx-auto">
-      <h1 className="text-3xl">Product Explorer</h1>
+    <div className="mx-auto my-6 ">
+      <h1 className="text-3xl my-2 font-bold">Product Explorer</h1>
 
       <div className="flex gap-2">
         <input
@@ -106,16 +84,16 @@ function Dashboard() {
             setSearch(e.target.value);
             setPage(0);
           }}
-          className="border"
+          className="border rounded p-2"
         />
 
-        <select onChange={(e) => setSortBy(e.target.value)} className="border">
+        <select onChange={(e) => setSortBy(e.target.value)} className="border rounded p-2">
           <option value="">Sort By</option>
           <option value="price">Price</option>
           <option value="rating">Rating</option>
         </select>
 
-        <select onChange={(e) => setOrder(e.target.value)} className="border">
+        <select onChange={(e) => setOrder(e.target.value)} className="border rounded p-2">
           <option value="">Sort Type</option>
           <option value="asc">Asc</option>
           <option value="desc">Desc</option>
@@ -124,10 +102,12 @@ function Dashboard() {
         <select
           value={selectedCategory}
           onChange={(e) => {
+            setSearch("")
+            setDebouncedSearch("")
             setSelectedCategory(e.target.value);
             setPage(0);
           }}
-          className="border"
+          className="border rounded p-2"
         >
           <option value="">All Categories</option>
           {categories.map((cat, i) => (
@@ -136,34 +116,30 @@ function Dashboard() {
             </option>
           ))}
         </select>
+
+        <Navbar/>
       </div>
 
-      <div className="flex flex-wrap">
+      <div className="gap-2 mt-6 ">
         {loading ? (
             <h2 className="text-2xl font-bold"> Loading....</h2>
         ):
-        products.map((p) => (
-          <div key={p.id}>
-            <img src={p.thumbnail} alt={p.title} />
-            <h3>{p.title}</h3>
-            <p>
-              <b>id:</b> {p.id}
-            </p>
-            <p>
-              <b>Category:</b> {p.category}
-            </p>
-            <p>
-              <b>Price:</b> ${p.price}
-            </p>
-            <p>
-              <b>Rating:</b> {p.rating}
-            </p>
-          </div>
-        ))}
+        // products.map((p) => (
+        //   <div key={p.id}>
+        //     <Card 
+        //       product={p}
+        //       addCart={addCart}
+        //       cart={cart}
+        //       decreaseQuantity={decreaseQuantity}
+        //     />
+        //   </div>
+        // ))
+        <ProductPage products={products} />
+        }
       </div>
 
-      <div className="flex gap-2 justify-center mt-4">
-        <button onClick={handlePrevious} className="border rounded px-4">
+      <div className="flex gap-2 justify-center my-4">
+        <button disabled={page===0} onClick={()=>setPage(page-1)} className="border rounded px-4 disabled:opacity-50 bg-red-400">
           Prev
         </button>
 
@@ -172,8 +148,9 @@ function Dashboard() {
         </div>
 
         <button
+        disabled={page == totalPages}
           onClick={() => setPage(page + 1)}
-          className="border rounded px-4"
+          className="border rounded px-4 bg-green-400"
         >
           Next
         </button>
