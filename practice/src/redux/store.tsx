@@ -1,5 +1,6 @@
 import { combineReducers, createStore } from "redux"
 import { taskReducer } from "./taskReducer"
+import { composeWithDevTools } from "@redux-devtools/extension"
 // import { countReducer } from "./countReducer"
 
 
@@ -8,4 +9,4 @@ const rootReducer = combineReducers({
     // count : countReducer
 })
 
-export const store = createStore(rootReducer)
+export const store = createStore(rootReducer,composeWithDevTools())
