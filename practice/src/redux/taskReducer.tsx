@@ -1,8 +1,9 @@
-import { ADD_TASK, DELETE_TASK } from "./ActionType"
+import { ADD_TASK, COUNT_TASK, DELETE_TASK } from "./ActionType"
 import type{ State, Action } from "./type"
 
 const initialState: State = {
   task: [],
+  count : 0
 }
 
 export const taskReducer = (state = initialState,action: Action): State => {
@@ -19,6 +20,12 @@ export const taskReducer = (state = initialState,action: Action): State => {
       return {
         ...state,
         task: state.task.filter((_, index) => index !== action.payload),
+      }
+
+    case COUNT_TASK:
+      return{
+        ...state,
+        count : state.count+1,
       }
 
     default:

@@ -1,14 +1,14 @@
 import { useDispatch, useSelector } from "react-redux"
-import { countIncrement } from "../redux/taskAction"
+import {  countTask } from "../redux/taskAction"
 
 const Navbar = () => {
     const dispatch = useDispatch()
-    const count = useSelector(state => state.count)
-    // const task = useSelector(state => state.task.task)
+    // const count = useSelector(state => state.count)
+    const count=useSelector(store=>store.task.count)
   return (
     <>
       <p>Hello Navbar</p>
-      <button onClick={()=>dispatch(countIncrement())}>Click me</button>
+      <button onClick={()=>dispatch(countTask())}>Click me</button>
       <p>{count}</p>
       {/* <p>{task.length}</p> */}
     </>

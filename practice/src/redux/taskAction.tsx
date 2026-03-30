@@ -1,4 +1,4 @@
-import { ADD_TASK, COUNT, DELETE_TASK } from "./ActionType"
+import { ADD_TASK, COUNT, COUNT_TASK, DELETE_TASK } from "./ActionType"
 
 export const addTask = (data: string) => {
   return {
@@ -14,14 +14,20 @@ export const deleteTask = (id: number) => {
   }
 }
 
-export const countIncrement = ()=>{
+export const countTask =()=>{
   return {
-    type :COUNT
+    type :COUNT_TASK
   }
 }
 
-export const countDecrement = ()=>{
-      return {
-        type : ADD_TASK
-      }
-}
+// export const countIncrement = ()=>{
+//   return {
+//     type :COUNT
+//   }
+// }
+
+// export const countDecrement = ()=>{
+//       return {
+//         type : ADD_TASK
+//       }
+// }
